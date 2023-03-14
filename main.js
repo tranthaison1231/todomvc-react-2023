@@ -26,8 +26,8 @@ function createTodoItemEl({ value, id, completed }) {
   return li;
 }
 
-function App() {
-  const LOCAL_STORAGE_KEY = 'todos';
+async function App() {
+  const TODO_APP_URL = 'https://64106f42be7258e14529c12f.mockapi.io';
   let todos = [];
   const inputEl = document.getElementById('input');
   const titleEl = document.getElementById('title');
@@ -35,14 +35,10 @@ function App() {
   const countEl = document.getElementById('count');
   const eventTarget = new EventTarget();
 
-  function saveTodos() {
-    window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos));
-  }
-
   function renderTodos() {
     const filter = getURLHash();
     let filterTodos = [...todos];
-    if (filter === 'active') filterTodos = todos.filter((todo) => !todo.completed);
+    if (filter === 'active') filterTodos = filterNotCompletedTodos(todos);
     else if (filter === 'completed') filterTodos = todos.filter((todo) => todo.completed);
     countEl.innerHTML = `${filterNotCompletedTodos(todos).length} items left`;
     listEl.replaceChildren(...filterTodos.map((todo) => createTodoItemEl(todo)));
@@ -55,43 +51,85 @@ function App() {
     });
   }
 
-  function readTodosInStorage() {
-    todos = JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
-  }
+  const createTodo = async ({ value, completed }) => {
+    try {
+      const res = await fetch(`${TODO_APP_URL}/todos`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ value, completed }),
+      });
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  inputEl.addEventListener('keyup', (event) => {
+  const fetchTodos = async () => {
+    try {
+      const res = await fetch(`${TODO_APP_URL}/todos`);
+      const data = await res.json();
+      todos = data;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const updateTodo = async ({ id, value, completed }) => {
+    try {
+      await fetch(`${TODO_APP_URL}/todos/${id}`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ value, completed }),
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  inputEl.addEventListener('keyup', async (event) => {
     if ((event.key === 'Enter' || event.keyCode === 13) && inputEl.value.trim() !== '') {
-      const newTodo = { value: inputEl.value, id: crypto.randomUUID(), completed: false };
+      const newTodo = await createTodo({ value: inputEl.value, completed: false });
       todos.push(newTodo);
-      const todoEl = createTodoItemEl(newTodo);
+      createTodoItemEl(newTodo);
       eventTarget.dispatchEvent(new CustomEvent('save'));
     }
   });
 
-  delegate(listEl, '[data-todo="toggle"]', 'click', (e) => {
-    const el = e.target.closest('[data-id]');
-    todos = todos.map((todo) => (todo.id === el.dataset.id ? { ...todo, completed: !todo.completed } : todo));
-    eventTarget.dispatchEvent(new CustomEvent('save'));
+  delegate(listEl, '[data-todo="toggle"]', 'click', async (e) => {
+    try {
+      const el = e.target.closest('[data-id]');
+      const todo = todos.find((todo) => todo.id === el.dataset.id);
+      await updateTodo({ ...todo, completed: !todo.completed });
+      todos = todos.map((todo) => (todo.id === el.dataset.id ? { ...todo, completed: !todo.completed } : todo));
+      eventTarget.dispatchEvent(new CustomEvent('save'));
+    } catch (error) {
+      console.error(error);
+    }
   });
 
-  delegate(listEl, '[data-todo="remove"]', 'click', (e) => {
+  delegate(listEl, '[data-todo="remove"]', 'click', async (e) => {
     const el = e.target.closest('[data-id]');
+    await fetch(`${TODO_APP_URL}/todos/${el.dataset.id}`, {
+      method: 'DELETE',
+    });
     todos = todos.filter((todo) => todo.id !== el.dataset.id);
     eventTarget.dispatchEvent(new CustomEvent('save'));
   });
 
-  delegate(listEl, '[data-todo="value"]', 'keydown', (e) => {
+  delegate(listEl, '[data-todo="value"]', 'keydown', async (e) => {
     const el = e.target.closest('[data-id]');
     if (event.keyCode === 13) {
       e.preventDefault();
       const content = el.querySelector('[data-todo="value"]').textContent;
+      const todo = todos.find((todo) => todo.id === el.dataset.id);
+      await updateTodo({ ...todo, value: content });
       todos = todos.map((todo) => (todo.id === el.dataset.id ? { ...todo, value: content } : todo));
       eventTarget.dispatchEvent(new CustomEvent('save'));
     }
   });
 
   eventTarget.addEventListener('save', () => {
-    saveTodos();
     renderTodos();
   });
 
@@ -99,7 +137,7 @@ function App() {
     renderTodos();
   });
 
-  readTodosInStorage();
+  await fetchTodos();
   renderTodos();
 }
 
