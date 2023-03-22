@@ -22,7 +22,7 @@ function createTodoItemEl({ value, id, completed }: Todo): HTMLLIElement {
       <i data-todo="remove" class='bx bx-trash text-[30px] cursor-pointer invisible group-hover:visible'></i>
     `
   )
-  li.querySelector('[data-todo="value"]')!.textContent = value
+  li.querySelector('[data-todo="value"]').textContent = value
   return li
 }
 
@@ -30,7 +30,7 @@ async function App(): Promise<void> {
   const TODO_APP_URL = 'https://64106f42be7258e14529c12f.mockapi.io'
   let todos: Todo[] = []
   const inputEl = <HTMLInputElement>document.getElementById('input')
-  const listEl = document.getElementById('list')!
+  const listEl = document.getElementById('list')
   const countEl = document.getElementById('count')
   const eventTarget = new EventTarget()
 
