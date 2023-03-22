@@ -4,11 +4,11 @@ interface Todo {
   completed: boolean
 }
 
-const getURLHash = () => document.location.hash.replace(/^#\//, '')
+const getURLHash = (): string => document.location.hash.replace(/^#\//, '')
 
-const filterNotCompletedTodos = (todos: Todo[]) => todos.filter(todo => !todo.completed)
+const filterNotCompletedTodos = (todos: Todo[]): Todo[] => todos.filter(todo => !todo.completed)
 
-function createTodoItemEl({ value, id, completed }: Todo) {
+function createTodoItemEl({ value, id, completed }: Todo): HTMLLIElement {
   const li = document.createElement('li')
   li.dataset.id = id
   li.className = 'py-[16px] group px-[20px] border-solid border-b-2 border-gray-300 flex items-center justify-between'
@@ -26,7 +26,7 @@ function createTodoItemEl({ value, id, completed }: Todo) {
   return li
 }
 
-async function App() {
+async function App(): Promise<void> {
   const TODO_APP_URL = 'https://64106f42be7258e14529c12f.mockapi.io'
   let todos: Todo[] = []
   const inputEl = <HTMLInputElement>document.getElementById('input')
@@ -34,7 +34,7 @@ async function App() {
   const countEl = document.getElementById('count')
   const eventTarget = new EventTarget()
 
-  function renderTodos() {
+  function renderTodos(): void {
     const filter = getURLHash()
     let filterTodos = [...todos]
     if (filter === 'active') filterTodos = filterNotCompletedTodos(todos)
@@ -50,7 +50,7 @@ async function App() {
     })
   }
 
-  const createTodo = async ({ value, completed }: Omit<Todo, 'id'>) => {
+  const createTodo = async ({ value, completed }: Omit<Todo, 'id'>): Promise<Todo> => {
     try {
       const res = await fetch(`${TODO_APP_URL}/todos`, {
         method: 'POST',
@@ -64,7 +64,7 @@ async function App() {
     }
   }
 
-  const fetchTodos = async () => {
+  const fetchTodos = async (): Promise<void> => {
     try {
       const res = await fetch(`${TODO_APP_URL}/todos`)
       const data = await res.json()
@@ -74,7 +74,7 @@ async function App() {
     }
   }
 
-  const updateTodo = async ({ id, value, completed }: Todo) => {
+  const updateTodo = async ({ id, value, completed }: Todo): Promise<void> => {
     try {
       await fetch(`${TODO_APP_URL}/todos/${id}`, {
         method: 'PUT',
@@ -88,7 +88,7 @@ async function App() {
 
   inputEl.addEventListener('keyup', async event => {
     try {
-      if ((event.key === 'Enter' || event.keyCode === 13) && inputEl.value.trim() !== '') {
+      if (event.key === 'Enter' && inputEl.value.trim() !== '') {
         const newTodo = await createTodo({ value: inputEl.value, completed: false })
         todos.push(newTodo)
         eventTarget.dispatchEvent(new CustomEvent('save'))
@@ -99,7 +99,7 @@ async function App() {
   })
 
   listEl.addEventListener('click', async e => {
-    const target = e.target as HTMLDivElement
+    const target = <HTMLDivElement>e.target
     if (target.matches('[data-todo="toggle"]')) {
       try {
         const el = target.closest<HTMLDivElement>('[data-id]')
@@ -114,7 +114,7 @@ async function App() {
   })
 
   listEl.addEventListener('click', async e => {
-    const target = e.target as HTMLDivElement
+    const target = <HTMLDivElement>e.target
     if (target.matches('[data-todo="remove"]')) {
       const el = target.closest<HTMLDivElement>('[data-id]')
       await fetch(`${TODO_APP_URL}/todos/${el?.dataset?.id}`, {
@@ -126,10 +126,10 @@ async function App() {
   })
 
   listEl.addEventListener('keydown', async e => {
-    const target = e.target as HTMLDivElement
+    const target = <HTMLDivElement>e.target
     if (target.matches('[data-todo="value"]')) {
       const el = target.closest<HTMLDivElement>('[data-id]')
-      if (e.keyCode === 13) {
+      if (e.key === 'Enter') {
         e.preventDefault()
         const content = el.querySelector('[data-todo="value"]').textContent
         const todo = todos.find(todo => todo.id === el.dataset.id)

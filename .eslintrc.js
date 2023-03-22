@@ -11,10 +11,14 @@ module.exports = {
     project: './tsconfig.json'
   },
   rules: {
-    '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-misused-promises': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
-    '@typescript-eslint/consistent-type-assertions': 'off',
+    '@typescript-eslint/consistent-type-assertions': [
+      1,
+      {
+        assertionStyle: 'angle-bracket'
+      }
+    ],
     '@typescript-eslint/space-before-function-paren': 'off',
     '@typescript-eslint/no-floating-promises': 'off',
     '@typescript-eslint/prefer-nullish-coalescing': 'off',

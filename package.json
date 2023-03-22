@@ -20,12 +20,12 @@
   },
   "homepage": "https://github.com/tranthaison1231/todomvc-2023#readme",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.43.0",
-    "eslint": "^8.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "eslint": "^8.36.0",
     "eslint-config-standard-with-typescript": "^34.0.1",
-    "eslint-plugin-import": "^2.25.2",
-    "eslint-plugin-n": "^15.0.0",
-    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.6.1",
+    "eslint-plugin-promise": "^6.1.1",
     "prettier": "^2.8.6",
     "typescript": "^5.0.2"
   }
