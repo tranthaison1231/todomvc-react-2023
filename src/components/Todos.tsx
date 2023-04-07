@@ -1,22 +1,37 @@
-import { type Todo } from '../App'
+import { type ITodo } from '../App'
+import Todo from './Todo'
 
 interface Props {
-  todos: Todo[]
+  todos: ITodo[]
+  onDelete: (id: string) => void
+  onUpdate: (id: string, todo: ITodo) => void
+  isDeleteLoading: boolean
 }
 
-function Todos({ todos }: Props): JSX.Element {
+function Todos({ todos, onDelete, isDeleteLoading, onUpdate }: Props): JSX.Element {
   return (
     <ul className="text-gray-600 text-[24px] bg-white">
       {todos.map(todo => (
-        <li className="py-[16px] group px-[20px] border-solid border-b-2 border-gray-300 flex items-center justify-between">
-          <div className="flex items-center w-full">
-            <i className={`bx ${todo.completed ? 'bx-check-square' : 'bx-square'} text-[30px] cursor-pointer`}></i>
-            <div contentEditable={true} className={`pl-[10px] w-full ${todo.completed ? 'line-through' : ''}`}>
-              {todo.value}
-            </div>
-          </div>
-          <i className="bx bx-trash text-[30px] cursor-pointer invisible group-hover:visible"></i>
-        </li>
+        <Todo
+          key={todo.id}
+          todo={todo}
+          isDeleteLoading={isDeleteLoading}
+          onDelete={() => {
+            onDelete(todo.id)
+          }}
+          onComplete={() => {
+            onUpdate(todo.id, {
+              ...todo,
+              completed: !todo.completed
+            })
+          }}
+          onUpdate={(value) => {
+            onUpdate(todo.id, {
+              ...todo,
+              value
+            })
+          }}
+        />
       ))}
     </ul>
   )
