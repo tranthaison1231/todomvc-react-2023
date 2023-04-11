@@ -1,4 +1,3 @@
-
 const Loading = (): JSX.Element => {
   return (
     <div className="flex justify-center items-center p-14">
