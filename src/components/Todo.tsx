@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react'
-import { type ITodo } from '../App'
+import { type ITodo } from '../api/todo'
 
 interface Props {
   todo: ITodo

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --check src",
-    "lint": "eslint --ext .ts src/ --fix",
+    "lint": "eslint --ext .tsx,.ts src/ --fix",
     "dev": "vite",
     "ts-check": "tsc",
     "build": "pnpm run ts-check && vite build"
@@ -40,6 +40,7 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.10.0",
     "vite": "^4.2.1"
   }
 }

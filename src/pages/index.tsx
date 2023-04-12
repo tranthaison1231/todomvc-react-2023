@@ -1,31 +1,15 @@
-import { useRef, useState, useEffect } from 'react'
-import Todos from './components/Todos'
-import Loading from './components/Loading'
+import { useEffect, useRef, useState } from 'react'
+import { Navigate } from 'react-router-dom'
+import Loading from '../components/Loading'
+import Todos from '../components/Todos'
+import { createTodo, deleteTodo, getTodos, type ITodo } from '../api/todo'
 
-export interface ITodo {
-  id: string
-  value: string
-  completed: boolean
-  isLoading?: boolean
+interface Props {
+  isAuthentication: boolean
+  onLogout: () => void
 }
 
-const TODO_APP_URL = 'https://64106f42be7258e14529c12f.mockapi.io'
-
-const createTodo = async ({ value, completed }: Omit<ITodo, 'id'>): Promise<ITodo | undefined> => {
-  try {
-    const res = await fetch(`${TODO_APP_URL}/todos`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ value, completed })
-    })
-    const data = await res.json()
-    return data
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-function App(): JSX.Element {
+function App({ isAuthentication = false, onLogout }: Props): JSX.Element {
   const [todos, setTodos] = useState<ITodo[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isDeleteLoading, setIsDeleteLoading] = useState(false)
@@ -45,12 +29,10 @@ function App(): JSX.Element {
     }
   }
 
-  const deleteTodo = async (id: string): Promise<void> => {
+  const handleDelete = async (id: string): Promise<void> => {
     try {
       setIsDeleteLoading(true)
-      await fetch(`${TODO_APP_URL}/todos/${id}`, {
-        method: 'DELETE'
-      })
+      await deleteTodo(id)
       setTodos(todos => todos.filter(todo => todo.id !== id))
     } catch (error) {
       console.log(error)
@@ -62,11 +44,7 @@ function App(): JSX.Element {
   const updateTodo = async (id: string, updatedTodo: ITodo): Promise<void> => {
     try {
       setTodos(todos => todos.map(todo => (todo.id === id ? { ...todo, isLoading: true } : todo)))
-      await fetch(`${TODO_APP_URL}/todos/${id}`, {
-        method: 'PUT',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(updatedTodo)
-      })
+      await updateTodo(id, updatedTodo)
       setTodos(todos => todos.map(todo => (todo.id === id ? updatedTodo : todo)))
     } catch (error) {
       console.log(error)
@@ -79,9 +57,8 @@ function App(): JSX.Element {
     const fetchTodos = async (): Promise<void> => {
       try {
         setIsLoading(true)
-        const res = await fetch(`${TODO_APP_URL}/todos`)
-        const data = await res.json()
-        setTodos(data)
+        const data = await getTodos()
+        data && setTodos(data)
       } catch (error) {
         console.error(error)
       } finally {
@@ -91,8 +68,15 @@ function App(): JSX.Element {
     fetchTodos()
   }, [])
 
+  if (!isAuthentication) {
+    return <Navigate to="/login" replace={true} />
+  }
+
   return (
     <div>
+      <div>
+        <button onClick={onLogout}> Logout </button>
+      </div>
       <div id="title" className="text-center text-[100px] text-[#ead7d7]">
         todos
       </div>
@@ -104,9 +88,12 @@ function App(): JSX.Element {
         placeholder="What need to be done?"
       />
       {isLoading
-        ? <Loading />
-        : <Todos todos={todos} onDelete={deleteTodo} isDeleteLoading={isDeleteLoading} onUpdate={updateTodo} />
-      }
+        ? (
+        <Loading />
+          )
+        : (
+        <Todos todos={todos} onDelete={handleDelete} isDeleteLoading={isDeleteLoading} onUpdate={updateTodo} />
+          )}
       <div className="bg-white w-full px-[20px] py-4 grid grid-cols-[1fr_2fr_1fr] shadow-xl">
         <span id="count"></span>
         <ul data-todo="filters" className="flex justify-center">
