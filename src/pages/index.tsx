@@ -1,15 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { createTodo, deleteTodo, getTodos, type ITodo } from '../api/todo'
+import Header from '../components/Header'
 import Loading from '../components/Loading'
 import Todos from '../components/Todos'
-import { createTodo, deleteTodo, getTodos, type ITodo } from '../api/todo'
+import withAuthenticate from '../hocs/withAuthenticate'
 
-interface Props {
-  isAuthentication: boolean
-  onLogout: () => void
-}
-
-function App({ isAuthentication = false, onLogout }: Props): JSX.Element {
+function App(): JSX.Element {
   const [todos, setTodos] = useState<ITodo[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isDeleteLoading, setIsDeleteLoading] = useState(false)
@@ -68,15 +64,9 @@ function App({ isAuthentication = false, onLogout }: Props): JSX.Element {
     fetchTodos()
   }, [])
 
-  if (!isAuthentication) {
-    return <Navigate to="/login" replace={true} />
-  }
-
   return (
     <div>
-      <div>
-        <button onClick={onLogout}> Logout </button>
-      </div>
+      <Header />
       <div id="title" className="text-center text-[100px] text-[#ead7d7]">
         todos
       </div>
@@ -118,4 +108,4 @@ function App({ isAuthentication = false, onLogout }: Props): JSX.Element {
   )
 }
 
-export default App
+export default withAuthenticate(App)

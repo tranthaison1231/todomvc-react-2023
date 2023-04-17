@@ -1,13 +1,11 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import Input from '../components/Input'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../api/login'
+import { AuthContext } from '../contexts/AuthContext'
 
-interface Props {
-  onSuccess: () => void
-}
-
-const Login = ({ onSuccess }: Props): JSX.Element => {
+const Login = (): JSX.Element => {
+  const { onSuccess } = useContext(AuthContext)
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
